@@ -9,15 +9,25 @@ public class exPath {
 	public exPath(int x, int y, ArrayList<Coordenadas> v)
 	{
 		// TODO Auto-generated constructor stub
+		coor = new Coordenadas(x,y);
+		if(v != null)
+		{
+			int tam = v.size();
+			ArrayList<Coordenadas> copia = new ArrayList<Coordenadas>(tam);
+			for(int f=0;f < tam;f++)
+			{
+				copia.add(v.get(tam));
+			}
+		}
 	}
 	
 	public Coordenadas getCoordenadas()
 	{
-		return null;
+		return coor;
 	}
 	
 	public ArrayList<Coordenadas> getCamino()
 	{
-		return null;
+		return camino;
 	}
 }
