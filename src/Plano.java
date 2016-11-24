@@ -11,6 +11,8 @@ public class Plano
 {
 	private Casilla[][] pl;
 	private Coordenadas dimension;
+	private Coordenadas comienzo;
+	private int numerodestinos;
 	
 	//si es menor que cero ponemos tres en su lugar, si no es asi le ponemos su numero, i para las filas y j para las columnas
 	public Plano(int i, int j) 
@@ -38,6 +40,8 @@ public class Plano
 		
 		pl = new Casilla[ip][jp];
 		this.dimension = new Coordenadas(ip,jp);
+		comienzo = null;
+		numerodestinos = 0;
 	}
 	
 	//comprobamos que las coordenadas sean correctas y de que no haya nada en es posicion
@@ -55,6 +59,19 @@ public class Plano
 				else
 				{
 					pl[x.getCoordenadas().getFila()][x.getCoordenadas().getColumna()] = x;
+					
+					if(x.esComienzo())
+					{
+						if(comienzo == null)
+						{
+							comienzo = x.getCoordenadas();
+						}
+					}
+					else if(x.esDestino())
+					{
+						numerodestinos++;
+					}
+					
 					return true;
 				}
 			}
@@ -197,6 +214,7 @@ public class Plano
 								Casilla nueva = new Casilla('d');
 								nueva.setNombre(planoleido[l+1]);
 								nueva.setCoordenadas(Integer.parseInt(planoleido[l+2].substring(0, 1)),Integer.parseInt(planoleido[l+2].substring(2, 3)),this);
+								numerodestinos++;
 								this.pl[Integer.parseInt(planoleido[l+2].substring(0,1))][Integer.parseInt(planoleido[l+2].substring(2,3))]=nueva;
 							}
 						}		
@@ -226,6 +244,7 @@ public class Plano
 								Casilla nueva = new Casilla('c');
 								nueva.setNombre(planoleido[l+1]);
 								nueva.setCoordenadas(Integer.parseInt(planoleido[l+2].substring(0, 1)),Integer.parseInt(planoleido[l+2].substring(2, 3)),this);
+								comienzo = new Coordenadas(Integer.parseInt(planoleido[l+2].substring(0, 1)),Integer.parseInt(planoleido[l+2].substring(2, 3)));
 								this.pl[Integer.parseInt(planoleido[l+2].substring(0,1))][Integer.parseInt(planoleido[l+2].substring(2,3))]=nueva;
 							}
 						}								
@@ -245,6 +264,16 @@ public class Plano
 		}
 		return 'F';
 	}
+	
+	//NEW comprobamos que las coordenadas que nos pasan esten correctas y no sean nulas, si es asi devolvemos la propiedad
+		public char consultaCasillaPropiedad(Coordenadas x)
+		{
+			if(x != null && x.getFila() >= 0 && x.getColumna() >= 0 && x.getFila() < this.pl.length && x.getColumna() < this.dimension.getColumna() && this.pl[x.getFila()][x.getColumna()] != null)
+			{
+				return pl[x.getFila()][x.getColumna()].getPropiedad();
+			}
+			return 'F';
+		}
 	
 	//comprobamos las casillas vecinas devolviendo un array de char de todas las que no esten dentro del plano
 	public char[] consultaVecinas(Coordenadas x)
@@ -788,5 +817,66 @@ public class Plano
 		}
 		
 		return null;
+	}
+	
+	//NEW sirve para tener el comienzo rapidamente
+	public Coordenadas getcomienzo()
+	{
+		return comienzo;
+	}
+	
+	//NEW nos servira para recoger el numero de destinos
+	public int getdestinos()
+	{
+		return numerodestinos;
+	}
+	
+	//New esta funcion devuelve true si puede cambiar la posicion que pasas en la coordenada a v, en caso de que este ocupado no se podra y devolvera false
+	public boolean cambiaraestado(Coordenadas x,char estado)
+	{
+		if(x != null && this.dimension != null)
+		{
+			if(x.getFila() <= this.dimension.getFila()-1 && x.getColumna() <= this.dimension.getColumna()-1 && x.getColumna() > -1 && x.getFila() > -1)
+			{	
+				//una vez comprobado que esta posicion existe pasamos a ver si se puede poner en libre
+				if(estado == 'T')
+				{
+					pl[x.getFila()][x.getColumna()] = new Casilla('p');
+					pl[x.getFila()][x.getColumna()].setPuerta(1, 'P');
+					pl[x.getFila()][x.getColumna()].setCoordenadas(x.getFila(), x.getColumna(), this);
+					return true;					
+				}
+				else
+				{
+					pl[x.getFila()][x.getColumna()] = new Casilla(estado);
+					pl[x.getFila()][x.getColumna()].setCoordenadas(x.getFila(), x.getColumna(), this);
+					return true;
+				}
+			}
+		}		
+		return false;
+	}
+	
+	void inicializartodolovistoalibre()
+	{
+		if(this.dimension != null)
+		{
+			for(Casilla[] casilla:pl)
+			{
+				if(casilla != null)
+				{
+					for(Casilla casilla2:casilla)
+					{
+						if(casilla2 != null)
+						{
+							if(casilla2.getTipo() == 'v')
+							{
+								casilla2 = new Casilla('l');
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }
